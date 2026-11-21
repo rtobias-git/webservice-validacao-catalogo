@@ -1,4 +1,4 @@
-# 🌸 WebService SOAP - Validação de Catálogo de Produtos
+# WebService SOAP - Validação de Catálogo de Produtos
 
 <p align="center">
   <img src="https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk" alt="Java 21" />
@@ -13,23 +13,23 @@ Sistema distribuído composto por um **WebService SOAP** desenvolvido em **Java 
 
 ---
 
-## 📌 Sumário
+## Sumário
 
-- [Visão Geral](#-visão-geral)
-- [Arquitetura e Tecnologias](#-arquitetura-e-tecnologias)
-- [Prints de Execução](#-prints-de-execução)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Pré-requisitos](#-pré-requisitos)
-- [Como Executar](#-como-executar)
+- [Visão Geral](#visão-geral)
+- [Arquitetura e Tecnologias](#arquitetura-e-tecnologias)
+- [Prints de Execução](#prints-de-execução)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Pré-requisitos](#pré-requisitos)
+- [Como Executar](#como-executar)
   - [1. Inicializando o Servidor SOAP](#1-inicializando-o-servidor-soap-java)
   - [2. Acessando o Contrato WSDL](#2-acessando-o-contrato-wsdl)
   - [3. Executando o Cliente](#3-executando-o-cliente-python)
-- [Funcionamento e Contrato SOAP](#-funcionamento-e-contrato-soap)
-- [Autor](#-autor)
+- [Funcionamento e Contrato SOAP](#funcionamento-e-contrato-soap)
+- [Autor](#autor)
 
 ---
 
-## 🔍 Visão Geral
+## Visão Geral
 
 O projeto exemplifica a interoperabilidade entre diferentes linguagens de programação (**Java** e **Python**) utilizando o protocolo de comunicação padrão de mercado **SOAP (Simple Object Access Protocol)** sobre HTTP.
 
@@ -38,7 +38,7 @@ O projeto exemplifica a interoperabilidade entre diferentes linguagens de progra
 
 ---
 
-## 🛠️ Arquitetura e Tecnologias
+## Arquitetura e Tecnologias
 
 ### Servidor
 - **Linguagem**: Java 21
@@ -55,7 +55,7 @@ O projeto exemplifica a interoperabilidade entre diferentes linguagens de progra
 
 ---
 
-## 📸 Prints de Execução
+## Prints de Execução
 
 ### 1. Inicialização do Servidor JAX-WS (Java)
 Compilação e inicialização do endpoint SOAP escutando requisições na porta `8080`:
@@ -78,7 +78,7 @@ Consultas interativas de produtos existentes e não existentes no catálogo da R
 
 ---
 
-## 📂 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```text
 webservice-validacao-catalogo/
@@ -106,7 +106,7 @@ webservice-validacao-catalogo/
 
 ---
 
-## 💻 Pré-requisitos
+## Pré-requisitos
 
 Certifique-se de ter instalado em seu ambiente:
 - **Java JDK 17+** (testado e homologado no OpenJDK 21)
@@ -115,7 +115,7 @@ Certifique-se de ter instalado em seu ambiente:
 
 ---
 
-## 🚀 Como Executar
+## Como Executar
 
 ### 1. Inicializando o Servidor SOAP (Java)
 
@@ -180,7 +180,7 @@ Programa finalizado
 
 ---
 
-## 📡 Funcionamento e Contrato SOAP
+## Funcionamento e Contrato SOAP
 
 O serviço expõe a operação `verificarProduto` com a seguinte assinatura:
 
@@ -217,8 +217,8 @@ boolean verificarProduto(String nomeProduto);
 
 ---
 
-## 👨‍💻 Autor
+## Autor
 
 Desenvolvido por **Tobias**  
-📧 Contato: [r.tobias@aluno.ifsp.edu.br](mailto:r.tobias@aluno.ifsp.edu.br)  
-🏛️ Instituto Federal de Educação, Ciência e Tecnologia de São Paulo - Câmpus Presidente Epitácio (IFSP-PEP)
+Contato: [r.tobias@aluno.ifsp.edu.br](mailto:r.tobias@aluno.ifsp.edu.br)  
+Instituição: Instituto Federal de Educação, Ciência e Tecnologia de São Paulo - Câmpus Presidente Epitácio (IFSP-PEP)
