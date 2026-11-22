@@ -13,6 +13,8 @@ import javax.xml.ws.Endpoint;
 public class ServidorPublisher {
 
     public static void main(String[] args) {
+        GerarXSD.gerar();
+        
         Endpoint.publish("http://127.0.0.1:8080/server",
                 new ServidorImpl());
         System.out.println("Servidor Iniciado..");

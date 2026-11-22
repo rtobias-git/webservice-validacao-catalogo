@@ -1,15 +1,17 @@
-# WebService SOAP - Validação de Catálogo de Produtos
+# WebService SOAP - Validação de Catálogo de Produtos com Validação XSD
 
 <p align="center">
   <img src="https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk" alt="Java 21" />
   <img src="https://img.shields.io/badge/Apache_Maven-3.9-C71A36?style=for-the-badge&logo=apachemaven" alt="Maven" />
   <img src="https://img.shields.io/badge/SOAP-JAX--WS-007396?style=for-the-badge&logo=java" alt="JAX-WS" />
+  <img src="https://img.shields.io/badge/XML_Schema-XSD-b07219?style=for-the-badge" alt="XSD" />
   <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3" />
   <img src="https://img.shields.io/badge/Zeep-SOAP_Client-blue?style=for-the-badge" alt="Zeep" />
+  <img src="https://img.shields.io/badge/lxml-XML_Validation-informational?style=for-the-badge" alt="lxml" />
   <img src="https://img.shields.io/badge/IFSP-PEP-green?style=for-the-badge" alt="IFSP PEP" />
 </p>
 
-Sistema distribuído composto por um **WebService SOAP** desenvolvido em **Java (JAX-WS)** e um cliente interativo desenvolvido em **Python (Zeep)**, permitindo a validação remota e verificação de disponibilidade de itens em um catálogo de produtos cosméticos (*Rare Beauty*).
+Sistema distribuído composto por um **WebService SOAP** desenvolvido em **Java (JAX-WS)** e um cliente interativo desenvolvido em **Python (Zeep + lxml)**. A aplicação realiza a validação e verificação de itens em um catálogo de produtos (*Rare Beauty*), contando agora com a **geração automática de arquivo XML Schema (XSD) no servidor** e **validação estrutural e semântica das respostas no cliente**.
 
 ---
 
@@ -17,13 +19,17 @@ Sistema distribuído composto por um **WebService SOAP** desenvolvido em **Java 
 
 - [Visão Geral](#visão-geral)
 - [Arquitetura e Tecnologias](#arquitetura-e-tecnologias)
-- [Prints de Execução](#prints-de-execução)
+- [Prints de Execução e Validação](#prints-de-execução-e-validação)
 - [Estrutura do Projeto](#estrutura-do-projeto)
 - [Pré-requisitos](#pré-requisitos)
 - [Como Executar](#como-executar)
   - [1. Inicializando o Servidor SOAP](#1-inicializando-o-servidor-soap-java)
   - [2. Acessando o Contrato WSDL](#2-acessando-o-contrato-wsdl)
-  - [3. Executando o Cliente](#3-executando-o-cliente-python)
+  - [3. Executando o Cliente com Validação XSD](#3-executando-o-cliente-python)
+- [Como Foi Feito: Geração e Validação XSD](#como-foi-feito-geração-e-validação-xsd)
+  - [1. Geração do Arquivo XSD no Servidor](#1-geração-do-arquivo-xsd-no-servidor-java)
+  - [2. Estrutura do Contrato XML Schema (`produto.xsd`)](#2-estrutura-do-contrato-xml-schema-produtoxsd)
+  - [3. Validação da Resposta no Cliente Python](#3-validação-da-resposta-no-cliente-python-lxml)
 - [Funcionamento e Contrato SOAP](#funcionamento-e-contrato-soap)
 - [Autor](#autor)
 
@@ -31,10 +37,10 @@ Sistema distribuído composto por um **WebService SOAP** desenvolvido em **Java 
 
 ## Visão Geral
 
-O projeto exemplifica a interoperabilidade entre diferentes linguagens de programação (**Java** e **Python**) utilizando o protocolo de comunicação padrão de mercado **SOAP (Simple Object Access Protocol)** sobre HTTP.
+O projeto exemplifica a interoperabilidade entre diferentes linguagens de programação (**Java** e **Python**) utilizando o protocolo de comunicação padrão de mercado **SOAP (Simple Object Access Protocol)** sobre HTTP, garantindo a integridade dos dados através de validação formal por **XML Schema (XSD)**:
 
-- **Servidor SOAP (Java)**: Publica um serviço na porta local `8080`, gerando automaticamente o contrato WSDL (*Web Services Description Language*). Implementa a lógica de negócio para busca e verificação de itens em uma base de dados em memória.
-- **Cliente SOAP (Python)**: Lê dinamicamente o WSDL em tempo de execução via biblioteca `zeep`, constrói os envelopes XML de requisição e exibe o resultado formatado no terminal para o usuário.
+- **Servidor SOAP (Java)**: Publica o serviço na porta local `8080`, gerando automaticamente o contrato WSDL e criando dinamicamente o arquivo de regras de validação `produto.xsd` caso ele ainda não exista no servidor.
+- **Cliente SOAP (Python)**: Carrega o contrato WSDL via `zeep` para chamadas remotas, efetua o parse e compilação do esquema `produto.xsd` via `lxml`, e valida rigorosamente os envelopes e dados de resposta antes de apresentá-los ao usuário.
 
 ---
 
@@ -44,21 +50,24 @@ O projeto exemplifica a interoperabilidade entre diferentes linguagens de progra
 - **Linguagem**: Java 21
 - **Gerenciador de Dependências / Build**: Apache Maven
 - **Padrão WebService**: JAX-WS (Jakarta XML Web Services API 2.3.3 + JAX-WS RI Runtime 2.3.5)
+- **Definição de Esquema**: XML Schema (XSD 1.0)
 - **Estilo de Mensagem**: Document / Literal (`SOAPBinding.Style.DOCUMENT`)
 - **Endpoint**: `http://127.0.0.1:8080/server`
 - **WSDL**: `http://127.0.0.1:8080/server?wsdl`
+- **Arquivo XSD**: `Servidor/produto.xsd`
 
 ### Cliente
 - **Linguagem**: Python 3
-- **Biblioteca SOAP**: [Zeep](https://docs.python-zeep.org/) (cliente SOAP rápido e compatível com especificações WSDL 1.1 e SOAP 1.1/1.2)
+- **Biblioteca SOAP**: [Zeep](https://docs.python-zeep.org/) (cliente SOAP compatível com WSDL 1.1 e SOAP 1.1/1.2)
+- **Biblioteca de Validação XML**: [lxml](https://lxml.de/) (`etree.XMLSchema`)
 - **Interface**: CLI interativa com parada controlada (`-1` para sair).
 
 ---
 
-## Prints de Execução
+## Prints de Execução e Validação
 
-### 1. Inicialização do Servidor JAX-WS (Java)
-Compilação e inicialização do endpoint SOAP escutando requisições na porta `8080`:
+### 1. Inicialização do Servidor JAX-WS e Geração do XSD (Java)
+Compilação e inicialização do servidor, executando a criação automática de `produto.xsd` e publicação do endpoint SOAP escutando na porta `8080`:
 
 ![Servidor SOAP Iniciado](docs/prints/01-servidor-iniciado.png)
 
@@ -71,10 +80,24 @@ Contrato XML gerado dinamicamente com definições de tipos, mensagens, operaç�
 
 ---
 
-### 3. Execução Interativa do Cliente (Python)
-Consultas interativas de produtos existentes e não existentes no catálogo da Rare Beauty:
+### 3. Estrutura do Esquema XSD Gerado no Servidor (`produto.xsd`)
+Arquivo de regras de validação gerado pela aplicação Java no servidor:
+
+![Arquivo XSD Gerado](docs/prints/04-xsd-gerado.png)
+
+---
+
+### 4. Execução Interativa do Cliente com Validação XSD (Python)
+Consultas interativas de produtos no catálogo da Rare Beauty com validação do esquema em tempo real:
 
 ![Cliente SOAP em Execução](docs/prints/03-cliente-execucao.png)
+
+---
+
+### 5. Evidência de Validação do Esquema XML (Aprovação e Rejeição)
+Demonstração da validação positiva da resposta e rejeição estrita caso o payload viole o contrato de tipos XSD:
+
+![Validação XSD da Resposta](docs/prints/05-validacao-xsd.png)
 
 ---
 
@@ -83,23 +106,27 @@ Consultas interativas de produtos existentes e não existentes no catálogo da R
 ```text
 webservice-validacao-catalogo/
 ├── Cliente/
-│   ├── cliente.py              # Script cliente SOAP em Python utilizando Zeep
-│   └── requirements.txt        # Dependências Python (zeep)
+│   ├── cliente.py              # Script cliente SOAP em Python com Zeep e validação XSD via lxml
+│   └── requirements.txt        # Dependências Python (zeep, lxml)
 ├── Servidor/
 │   ├── pom.xml                 # Configurações do Maven e dependências JAX-WS
+│   ├── produto.xsd             # Esquema XML gerado no servidor para validação de requisição e resposta
 │   └── src/
 │       └── main/
 │           └── java/
 │               └── br/edu/ifsp/pep/servidor/
 │                   ├── CatalogoProdutos.java    # Base de dados em memória
+│                   ├── GerarXSD.java            # Classe que gera dinamicamente o arquivo produto.xsd
 │                   ├── Servidor.java            # Interface do serviço (@WebService)
 │                   ├── ServidorImpl.java        # Implementação do método verificarProduto
-│                   └── ServidorPublisher.java   # Classe principal que publica o Endpoint
+│                   └── ServidorPublisher.java   # Publica o Endpoint e aciona a geração do XSD
 ├── docs/
 │   └── prints/                 # Imagens de evidência e execução
 │       ├── 01-servidor-iniciado.png
 │       ├── 02-wsdl-inspecao.png
-│       └── 03-cliente-execucao.png
+│       ├── 03-cliente-execucao.png
+│       ├── 04-xsd-gerado.png
+│       └── 05-validacao-xsd.png
 ├── .gitignore                  # Arquivos ignorados pelo Git (classes, target, etc.)
 └── README.md                   # Documentação completa do projeto
 ```
@@ -126,8 +153,9 @@ cd Servidor
 mvn clean compile exec:java
 ```
 
-Você verá a saída confirmando a subida do serviço:
+Você verá a saída confirmando a geração do arquivo XSD e a subida do serviço:
 ```text
+Arquivo XSD criado
 Servidor Iniciado..
 ```
 
@@ -175,8 +203,60 @@ Digite o nome do produto ou -1 para sair: Batom Avon
 O produto nao pertence ao catalogo da Rare Beauty
 
 Digite o nome do produto ou -1 para sair: -1
-Programa finalizado 
+Programa finalizado
 ```
+
+---
+
+## Como Foi Feito: Geração e Validação XSD
+
+### 1. Geração do Arquivo XSD no Servidor (Java)
+
+Foi criada a classe `GerarXSD.java` dentro do pacote `br.edu.ifsp.pep.servidor`:
+- O método estático `GerarXSD.gerar()` verifica se o arquivo `produto.xsd` já existe na pasta de execução do servidor.
+- Caso não exista, utiliza a API `FileWriter` do Java para escrever o conteúdo da definição XML Schema (XSD) em disco e emite a mensagem `Arquivo XSD criado`.
+- Caso já exista, mantém o arquivo e emite `XSD já existe`.
+- Na classe `ServidorPublisher.java`, a chamada `GerarXSD.gerar()` foi inserida antes da publicação do serviço com `Endpoint.publish()`, garantindo que o esquema esteja sempre disponível para validação antes que qualquer cliente se conecte.
+
+### 2. Estrutura do Contrato XML Schema (`produto.xsd`)
+
+O esquema XSD define as regras estruturais e os tipos de dados aceitos para a requisição e para a resposta:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Define a estrutura da mensagem de requisição -->
+    <xs:element name="verificarProduto">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="nomeProduto" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Define a estrutura da mensagem de resposta -->
+    <xs:element name="verificarProdutoResposta">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="retorno" type="xs:boolean"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
+```
+
+- **`verificarProduto`**: Elemento complexo que encapsula o campo `nomeProduto` do tipo string (`xs:string`).
+- **`verificarProdutoResposta`**: Elemento complexo que encapsula o campo `retorno` do tipo booleano (`xs:boolean`).
+
+### 3. Validação da Resposta no Cliente Python (`lxml`)
+
+No cliente Python (`Cliente/cliente.py`), foi integrada a biblioteca `lxml`:
+1. **Carregamento do Schema**: O arquivo `../Servidor/produto.xsd` é lido com `etree.parse()` e compilado em um validador `etree.XMLSchema`.
+2. **Construção do XML da Resposta**: A cada requisição SOAP realizada pelo `zeep`, o cliente monta a estrutura XML correspondente à resposta (`verificarProdutoResposta` com o subelemento `retorno` contendo o valor booleano em minúsculo: `"true"` ou `"false"`).
+3. **Validação Rigorosa**: O método `schema.validate(resposta)` verifica se o XML está em total conformidade com as regras do XSD (estrutura de tags e restrição atômica de `xs:boolean`).
+4. **Tratamento de Exceções**: Se o XML for válido, a mensagem de sucesso de catálogo é apresentada; caso a estrutura viole o XSD, uma mensagem de erro é exibida junto ao log técnico de violação (`schema.error_log`), bloqueando dados inválidos.
 
 ---
 
